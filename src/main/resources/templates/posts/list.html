@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>All Blog Posts</title>
+</head>
+<body>
+<h1>All Blog Posts</h1>
+<a th:href="@{/posts/create}">Create New Post</a>
+
+<form method="get" th:action="@{/posts}">
+    <label for="author">Author:</label>
+    <input type="text" id="author" name="author" th:value="${param.author}"/>
+
+<!--    <label for="tag">Tag:</label>-->
+<!--    <input type="text" id="tag" name="tag" th:value="${param.tag}"/>-->
+
+    <label for="publishedDate">Published Date:</label>
+    <input type="date" id="publishedDate" name="publishedDate" th:value="${param.publishedDate}"/>
+
+    <button type="submit">Filter</button>
+</form>
+
+
+<div th:each="post : ${postPage.content}">
+    <h2 th:text="${post.title}"></h2>
+    <p th:text="${post.excerpt}"></p>
+    <p>Author: <span th:text="${post.author}"></span></p>
+    <p>Published At: <span th:text="${post.publishedAt}"></span></p>
+    <a th:href="@{'/posts/' + ${post.id}}">Read More</a>
+    <a th:href="@{'/posts/' + ${post.id} + '/edit'}">Edit</a>
+    <form th:action="@{'/posts/' + ${post.id} + '/delete'}" method="post">
+        <button type="submit">Delete</button>
+    </form>
+    <hr>
+</div>
+
+<div>
+    <span th:text="'Page ' + ${postPage.number + 1} + ' of ' + ${postPage.totalPages}"></span>
+
+    <div>
+        <a th:if="${postPage.hasPrevious()}"
+           th:href="@{/posts(page=${postPage.number - 1})}">Previous</a>
+
+        <span th:each="i : ${#numbers.sequence(0, postPage.totalPages - 1)}">
+            <a th:href="@{/posts(page=${i})}"
+               th:text="${i + 1}"
+               th:classappend="${i == postPage.number} ? 'active'"> </a>
+        </span>
+
+        <a th:if="${postPage.hasNext()}"
+           th:href="@{/posts(page=${postPage.number + 1})}">Next</a>
+    </div>
+</div>
+
+
+</body>
+</html>

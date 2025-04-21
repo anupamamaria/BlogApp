@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>View Post</title>
+</head>
+<body>
+<h1 th:text="${post.title}"></h1>
+<p th:text="${post.content}"></p>
+<p>Author: <span th:text="${post.author}"></span></p>
+<p>Published At: <span th:text="${post.publishedAt}"></span></p>
+
+<a th:href="@{'/posts/' + ${post.id} + '/edit'}">Edit Post</a>
+
+<hr>
+<h2>Comments</h2>
+<div th:each="comment : ${comments}">
+    <p>
+        <strong th:text="${comment.name}">Commenter Name</strong>:
+        <span th:text="${comment.comment}">Comment text</span>
+    </p>
+
+    <!-- Edit Link -->
+    <a th:href="@{'/comments/' + ${comment.id} + '/update?postId=' + ${post.id}}">Edit</a>
+
+    <form th:action="@{'/comments/' + ${comment.id} + '/delete'}" method="post">
+        <input type="hidden" name="postId" th:value="${post.id}" />
+        <button type="submit">Delete</button>
+    </form>
+    <hr/>
+</div>
+
+<!-- ADD COMMENT FORM -->
+<!--<h3>Add Comment</h3>-->
+<!--<form th:action="@{/comments/add}" th:object="${comment}" method="post">-->
+<!--    <input type="hidden" name="postId" th:value="${post.id}" />-->
+
+<!--&lt;!&ndash;  <input type="hidden" th:field="*{post.id}" />&ndash;&gt;-->
+
+<!--    <label>Name:</label><br>-->
+<!--    <input type="text" th:field="*{name}" required /><br><br>-->
+
+<!--    <label>Email:</label><br>-->
+<!--    <input type="email" th:field="*{email}"  required /><br><br>-->
+
+<!--    <label>Comment:</label><br>-->
+<!--    <textarea th:field="*{comment}"  rows="4" cols="50" required></textarea><br><br>-->
+
+<!--    <button type="submit">Add Comment</button>-->
+<!--</form>-->
+
+<form th:action="@{/comments/add}" th:object="${commentForm}" method="post">
+    <input type="hidden" name="postId" th:value="${post.id}" />
+
+    <label>Name:</label><br>
+    <input type="text" th:field="*{name}" required /><br><br>
+
+    <label>Email:</label><br>
+    <input type="email" th:field="*{email}" required /><br><br>
+
+    <label>Comment:</label><br>
+    <textarea th:field="*{comment}" rows="4" cols="50" required></textarea><br><br>
+
+    <button type="submit">Add Comment</button>
+</form>
+
+<!--<form th:action="@{/comments/add}" method="post">-->
+<!--    <input type="hidden" name="postId" th:value="${post.id}" />-->
+
+<!--    <label>Name:</label><br>-->
+<!--    <input type="text" name="name" required /><br><br>-->
+
+<!--    <label>Email:</label><br>-->
+<!--    <input type="email" name="email" required /><br><br>-->
+
+<!--    <label>Comment:</label><br>-->
+<!--    <textarea name="comment" rows="4" cols="50" required></textarea><br><br>-->
+
+<!--    <button type="submit">Add Comment</button>-->
+<!--</form>-->
+</body>
+</html>
