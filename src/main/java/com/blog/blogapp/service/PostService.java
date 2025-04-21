@@ -11,9 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @Transactional
@@ -28,38 +26,32 @@ public class PostService {
     }
 
 
-//    public Page<Post> getAllPosts(Pageable pageable) {
-//        return postRepository.findAll(pageable);
-//    }
+    public Page<Post> getFilteredPosts(List<String> authors, List<String> tags,
+                                       LocalDateTime startOfDay, LocalDateTime endOfDay,
+                                       Pageable pageable) {
 
-    // NEW — supports filtering, sorting, and pagination
-//    public Page<Post> filterPosts(String author, LocalDateTime publishedAt, Pageable pageable) {
-//        return postRepository.findByAuthorContainingAndPublishedAtBetween(
-//                author, publishedAt, pageable);
-//    }
+        //if (startOfDay != null && endOfDay != null) {
+            return postRepository.findPostsWithFiltersAndAllTags(authors, tags, startOfDay, endOfDay, pageable);
+       // }
+//        else {
+//            return postRepository.findPostsWithFiltersNoDate(authors, tags, startOfDay, endOfDay, pageable);
+//       }
+    }
 
+    public List<String> findAllAuthors() {
+        List<Post> posts = postRepository.findAll(); // Fetch all posts
+        Set<String> authors = new HashSet<>(); // Use a Set to ensure uniqueness
 
-//    public List<Post> findAllPosts() {
-//        return postRepository.findAll();
-//    }
-
-    public Page<Post> getFilteredPosts(String author, String tag, LocalDateTime startOfDay, LocalDateTime endOfDay, Pageable pageable) {
-        // If tag is empty, use a query without tag filtering
-        if (tag == null || tag.isEmpty()) {
-            if (startOfDay != null && endOfDay != null) {
-                return postRepository.findByAuthorAndPublishedDate(author, startOfDay, endOfDay, pageable);
-            } else {
-                return postRepository.findByAuthorContaining(author, pageable);
-            }
-        } else {
-            // If tag is specified, use queries with tag filtering
-            if (startOfDay != null && endOfDay != null) {
-                return postRepository.findByAuthorTagAndPublishedDate(author, tag, startOfDay, endOfDay, pageable);
-            } else {
-                return postRepository.findByAuthorAndTag(author, tag, pageable);
+        for (Post post : posts) {
+            String author = post.getAuthor();
+            if (author != null && !authors.contains(author)) {
+                authors.add(author); // Add the author to the Set if not already present
             }
         }
+
+        return new ArrayList<>(authors); // Convert the Set to a List
     }
+
 
     public Optional<Post> findPostById(Long id) {
         return postRepository.findById(id);

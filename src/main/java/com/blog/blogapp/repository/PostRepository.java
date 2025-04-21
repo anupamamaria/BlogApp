@@ -7,53 +7,34 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 
 import java.time.LocalDateTime;
+import java.util.List;
 
+@Repository
 public interface PostRepository  extends JpaRepository<Post, Long>, JpaSpecificationExecutor<Post> {
     Page<Post> findAll(Pageable pageable);
 //    Page<Post> findByAuthorContainingAndPublishedAtBetween(
 //            String author, LocalDateTime publishedAt, Pageable pageable);
 
-//
-//    @Query("SELECT p FROM Post p WHERE (:author = '' OR p.author LIKE %:author%) AND p.publishedAt BETWEEN :startOfDay AND :endOfDay")
-//    Page<Post> findByAuthorAndPublishedDateBetween(
-//            @Param("author") String author,
-//            @Param("startOfDay") LocalDateTime startOfDay,
-//            @Param("endOfDay") LocalDateTime endOfDay,
-//            Pageable pageable);
 
-    // Find by author and tag
-    @Query("SELECT DISTINCT p FROM Post p JOIN p.tags t WHERE (:author = '' OR p.author LIKE %:author%) AND (:tag = '' OR t.name = :tag)")
-    Page<Post> findByAuthorAndTag(
-            @Param("author") String author,
-            @Param("tag") String tag,
+
+    @Query("SELECT DISTINCT p FROM Post p " +
+            "LEFT JOIN p.tags t " +
+            "WHERE (:#{#authors == null or #authors.isEmpty()} = true OR p.author IN :authors) " +
+            "AND (:#{#tags == null or #tags.isEmpty()} = true OR t.name IN :tags) " +
+            "AND (CAST(:startDate AS timestamp) IS NULL OR p.publishedAt >= :startDate) " +
+            "AND (CAST(:endDate AS timestamp) IS NULL OR p.publishedAt <= :endDate) " +
+            "GROUP BY p " +
+            "HAVING (:#{#tags == null or #tags.isEmpty()} = true OR COUNT(DISTINCT t.name) = :#{#tags.size()})")
+    Page<Post> findPostsWithFiltersAndAllTags(
+            @Param("authors") List<String> authors,
+            @Param("tags") List<String> tags,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
             Pageable pageable
     );
-
-    // Find by author, tag, and published date
-    @Query("SELECT DISTINCT p FROM Post p JOIN p.tags t WHERE (:author = '' OR p.author LIKE %:author%) AND " +
-            "(:tag = '' OR t.name = :tag) AND " +
-            "p.publishedAt BETWEEN :startOfDay AND :endOfDay")
-    Page<Post> findByAuthorTagAndPublishedDate(
-            @Param("author") String author,
-            @Param("tag") String tag,
-            @Param("startOfDay") LocalDateTime startOfDay,
-            @Param("endOfDay") LocalDateTime endOfDay,
-            Pageable pageable
-    );
-
-    // Case: No tag, just author
-    @Query("SELECT p FROM Post p WHERE (:author = '' OR p.author LIKE %:author%)")
-    Page<Post> findByAuthorContaining(@Param("author") String author, Pageable pageable);
-
-    // Case: No tag, author + published date
-    @Query("SELECT p FROM Post p WHERE (:author = '' OR p.author LIKE %:author%) AND " +
-            "p.publishedAt BETWEEN :startOfDay AND :endOfDay")
-    Page<Post> findByAuthorAndPublishedDate(@Param("author") String author,
-                                            @Param("startOfDay") LocalDateTime startOfDay,
-                                            @Param("endOfDay") LocalDateTime endOfDay,
-                                            Pageable pageable);
 
 }

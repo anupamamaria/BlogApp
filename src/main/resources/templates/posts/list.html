@@ -9,22 +9,72 @@
 <a th:href="@{/posts/create}">Create New Post</a>
 
 <form method="get" th:action="@{/posts}">
-    <label for="author">Author:</label>
-    <input type="text" id="author" name="author" th:value="${param.author}"/>
+<!--    <label for="author">Author:</label>-->
+<!--    <input type="text" id="author" name="author" th:value="${param.author}"/>-->
 
-    <label for="tag">Tag:</label>
-    <select id="tag" name="tag">
-        <option value="">-- All Tags --</option>
-        <option th:each="tagObj : ${allTags}"
-                th:value="${tagObj.name}"
-                th:text="${tagObj.name}"
-                th:selected="${tagObj.name == tag}"></option>
-    </select>
+<!--    <label for="tag">Tag:</label>-->
+<!--    <select id="tag" name="tag">-->
+<!--        <option value="">&#45;&#45; All Tags &#45;&#45;</option>-->
+<!--        <option th:each="tagObj : ${allTags}"-->
+<!--                th:value="${tagObj.name}"-->
+<!--                th:text="${tagObj.name}"-->
+<!--                th:selected="${tagObj.name == tag}"></option>-->
+<!--    </select>-->
 
-    <label for="publishedDate">Published Date:</label>
-    <input type="date" id="publishedDate" name="publishedDate" th:value="${param.publishedDate}"/>
 
-    <button type="submit">Filter</button>
+<!--    <label for="author">Author:</label>-->
+<!--    <select id="author" name="authors" multiple>-->
+<!--        <option th:each="authorObj : ${allAuthors}"-->
+<!--                th:value="${authorObj}"-->
+<!--                th:text="${authorObj}"></option>-->
+<!--    </select>-->
+
+<!--    <label for="tag">Tag:</label>-->
+<!--    <select id="tag" name="tags" multiple>-->
+<!--        <option th:each="tagObj : ${allTags}"-->
+<!--                th:value="${tagObj.name}"-->
+<!--                th:text="${tagObj.name}"></option>-->
+<!--    </select>-->
+
+
+<!--    <label for="publishedDate">Published Date:</label>-->
+<!--    <input type="date" id="publishedDate" name="publishedDate" th:value="${param.publishedDate}"/>-->
+
+<!--    <button type="submit">Filter</button>-->
+
+    <div class="filter-container">
+        <details>
+            <summary>Filter</summary>
+            <div class="filter-options">
+                <div class="filter-group">
+                    <h4>Authors:</h4>
+                    <select name="authors" multiple>
+                        <option th:each="authorObj : ${allAuthors}"
+                                th:value="${authorObj}"
+                                th:text="${authorObj}"
+                                th:selected="${authors != null && authors.contains(authorObj)}"></option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <h4>Tags:</h4>
+                    <select name="tags" multiple>
+                        <option th:each="tagObj : ${allTags}"
+                                th:value="${tagObj.name}"
+                                th:text="${tagObj.name}"
+                                th:selected="${tags != null && tags.contains(tagObj.name)}"></option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <h4>Published Date:</h4>
+                    <input type="date" name="publishedDate" th:value="${publishedDate}">
+                </div>
+
+                <button type="submit">Apply Filters</button>
+            </div>
+        </details>
+    </div>
 </form>
 
 

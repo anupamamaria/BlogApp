@@ -37,8 +37,8 @@ public class PostController {
     @GetMapping
     public String listPosts(@RequestParam(defaultValue = "publishedAt") String sortBy,
                             @RequestParam(defaultValue = "desc") String sortOrder,
-                            @RequestParam(defaultValue = "") String author,
-                            @RequestParam(defaultValue = "") String tag,
+                            @RequestParam(defaultValue = "") List<String> authors,
+                            @RequestParam(defaultValue = "") List<String> tags,
                             @RequestParam(defaultValue = "") String publishedDate,
                             @RequestParam(defaultValue = "0") int page,
                             Model model) {
@@ -68,9 +68,8 @@ public class PostController {
             }
         }
 
-        System.out.println("Filtering by: author=" + author + ", startOfDay=" + startOfDayTime + ", endOfDay=" + endOfDayTime);
 
-        Page<Post> postPage = postService.getFilteredPosts(author, tag,startOfDayTime, endOfDayTime, pageable);
+        Page<Post> postPage = postService.getFilteredPosts(authors, tags, startOfDayTime, endOfDayTime, pageable);
 
 
         model.addAttribute("postPage", postPage);
@@ -79,13 +78,13 @@ public class PostController {
 
 
         // Preserve filters/sorting in the view
-        model.addAttribute("author", author);
-        model.addAttribute("tag", tag);
+        model.addAttribute("authors", authors);
+        model.addAttribute("tags", tags);
         model.addAttribute("publishedDate", publishedDate);
         model.addAttribute("sortBy", sortBy);
         model.addAttribute("sortOrder", sortOrder);
-        List<Tag> allTags = tagRepository.findAll();
-        model.addAttribute("allTags", allTags);
+        model.addAttribute("allTags", tagRepository.findAll());
+        model.addAttribute("allAuthors", postService.findAllAuthors());
 
 
         return "posts/list";
