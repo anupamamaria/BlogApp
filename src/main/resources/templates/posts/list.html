@@ -12,8 +12,14 @@
     <label for="author">Author:</label>
     <input type="text" id="author" name="author" th:value="${param.author}"/>
 
-<!--    <label for="tag">Tag:</label>-->
-<!--    <input type="text" id="tag" name="tag" th:value="${param.tag}"/>-->
+    <label for="tag">Tag:</label>
+    <select id="tag" name="tag">
+        <option value="">-- All Tags --</option>
+        <option th:each="tagObj : ${allTags}"
+                th:value="${tagObj.name}"
+                th:text="${tagObj.name}"
+                th:selected="${tagObj.name == tag}"></option>
+    </select>
 
     <label for="publishedDate">Published Date:</label>
     <input type="date" id="publishedDate" name="publishedDate" th:value="${param.publishedDate}"/>
@@ -27,6 +33,11 @@
     <p th:text="${post.excerpt}"></p>
     <p>Author: <span th:text="${post.author}"></span></p>
     <p>Published At: <span th:text="${post.publishedAt}"></span></p>
+
+    <p>Tags:
+        <span th:each="tag : ${post.tags}" th:text="${tag.name} + ' '" />
+    </p>
+
     <a th:href="@{'/posts/' + ${post.id}}">Read More</a>
     <a th:href="@{'/posts/' + ${post.id} + '/edit'}">Edit</a>
     <form th:action="@{'/posts/' + ${post.id} + '/delete'}" method="post">

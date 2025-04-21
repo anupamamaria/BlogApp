@@ -21,6 +21,9 @@ public class Tag {
         return id;
     }
 
+
+
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -49,11 +52,11 @@ public class Tag {
         this.updatedAt = updatedAt;
     }
 
-    public Set<Post> getPosts() {
-        return posts;
-    }
-
-    public void setPosts(Set<Post> posts) {
-        this.posts = posts;
-    }
+//    public Set<Post> getPosts() {
+//        return posts;
+//    }
+//
+//    public void setPosts(Set<Post> posts) {
+//        this.posts = posts;
+//    }
 }

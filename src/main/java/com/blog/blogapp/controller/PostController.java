@@ -1,6 +1,8 @@
 package com.blog.blogapp.controller;
 import com.blog.blogapp.entity.Post;
 import com.blog.blogapp.entity.Comment;
+import com.blog.blogapp.entity.Tag;
+import com.blog.blogapp.repository.TagRepository;
 import com.blog.blogapp.service.PostService;
 import com.blog.blogapp.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/posts")
@@ -25,14 +28,17 @@ public class PostController {
     private PostService postService;
 
     @Autowired
+    private TagRepository tagRepository;
+
+    @Autowired
     private CommentService commentService;
 
     // List all posts
     @GetMapping
     public String listPosts(@RequestParam(defaultValue = "publishedAt") String sortBy,
-                             @RequestParam(defaultValue = "desc") String sortOrder,
+                            @RequestParam(defaultValue = "desc") String sortOrder,
                             @RequestParam(defaultValue = "") String author,
-//                            @RequestParam(defaultValue = "") String tag,
+                            @RequestParam(defaultValue = "") String tag,
                             @RequestParam(defaultValue = "") String publishedDate,
                             @RequestParam(defaultValue = "0") int page,
                             Model model) {
@@ -64,7 +70,7 @@ public class PostController {
 
         System.out.println("Filtering by: author=" + author + ", startOfDay=" + startOfDayTime + ", endOfDay=" + endOfDayTime);
 
-        Page<Post> postPage = postService.getFilteredPosts(author, startOfDayTime, endOfDayTime, pageable);
+        Page<Post> postPage = postService.getFilteredPosts(author, tag,startOfDayTime, endOfDayTime, pageable);
 
 
         model.addAttribute("postPage", postPage);
@@ -74,10 +80,13 @@ public class PostController {
 
         // Preserve filters/sorting in the view
         model.addAttribute("author", author);
-        //model.addAttribute("tag", tag);
+        model.addAttribute("tag", tag);
         model.addAttribute("publishedDate", publishedDate);
         model.addAttribute("sortBy", sortBy);
         model.addAttribute("sortOrder", sortOrder);
+        List<Tag> allTags = tagRepository.findAll();
+        model.addAttribute("allTags", allTags);
+
 
         return "posts/list";
     }
@@ -115,26 +124,131 @@ public class PostController {
     }
 
     // Submit new post
+//    @PostMapping
+//    public String createPost(@ModelAttribute Post post) {
+//        postService.createPost(post);
+//        return "redirect:/posts";
+//    }
+
+    // Method to handle form submission
     @PostMapping
-    public String createPost(@ModelAttribute Post post) {
+    public String savePost(@ModelAttribute Post post, @RequestParam("tagString") String tagString) {
+        // Split the input string and create tag list
+        List<String> tagNames = new ArrayList<>();
+        if (tagString != null && !tagString.isEmpty()) {
+            String[] parts = tagString.split(",");
+            for (String part : parts) {
+                String trimmedTag = part.trim();
+                if (!trimmedTag.isEmpty()) {
+                    tagNames.add(trimmedTag);
+                }
+            }
+        }
+
+// Create Tag entities from the names
+        Set<Tag> tags = new HashSet<>();
+        for (String tagName : tagNames) {
+            // Try to find existing tag
+            Tag existingTag = tagRepository.findByName(tagName);
+
+            Tag tag;
+            if (existingTag != null) {
+                // Use existing tag
+                tag = existingTag;
+            } else {
+                // Create new tag
+                Tag newTag = new Tag();
+                newTag.setName(tagName);
+                tag = tagRepository.save(newTag);
+            }
+            tags.add(tag);
+        }
+
+        post.setTags(tags);
         postService.createPost(post);
         return "redirect:/posts";
     }
 
+
+
     // Show form to edit post
+//    @GetMapping("/{id}/edit")
+//    public String showEditForm(@PathVariable Long id, Model model) {
+//        Post post = postService.findPostById(id).orElseThrow();
+//        model.addAttribute("post", post);
+//        return "posts/edit";
+//    }
+
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable Long id, Model model) {
         Post post = postService.findPostById(id).orElseThrow();
+
+        // Convert tags to comma-separated string
+        StringBuilder tagString = new StringBuilder();
+        boolean first = true;
+
+        for (Tag tag : post.getTags()) {
+            if (!first) {
+                tagString.append(", ");
+            }
+            tagString.append(tag.getName());
+            first = false;
+        }
+
         model.addAttribute("post", post);
+        model.addAttribute("tagString", tagString.toString());
         return "posts/edit";
     }
 
-    // Submit update
+     //Submit update
+//    @PostMapping("/{id}/update")
+//    public String updatePost(@PathVariable Long id, @ModelAttribute Post post) {
+//        postService.updatePost(id, post);
+//        return "redirect:/posts";
+//    }
+
+
+
     @PostMapping("/{id}/update")
-    public String updatePost(@PathVariable Long id, @ModelAttribute Post post) {
+    public String updatePost(@PathVariable Long id, @ModelAttribute Post post, @RequestParam("tagString") String tagString) {
+        // Split the input string and create tag list
+        List<String> tagNames = new ArrayList<>();
+        if (tagString != null && !tagString.isEmpty()) {
+            String[] parts = tagString.split(",");
+            for (String part : parts) {
+                String trimmedTag = part.trim();
+                if (!trimmedTag.isEmpty()) {
+                    tagNames.add(trimmedTag);
+                }
+            }
+        }
+
+        // Create Tag entities from the names
+        Set<Tag> tags = new HashSet<>();
+        for (String tagName : tagNames) {
+            // Try to find existing tag
+            Tag existingTag = tagRepository.findByName(tagName);
+
+            Tag tag;
+            if (existingTag != null) {
+                // Use existing tag
+                tag = existingTag;
+            } else {
+                // Create new tag
+                Tag newTag = new Tag();
+                newTag.setName(tagName);
+                tag = tagRepository.save(newTag);
+            }
+
+            tags.add(tag);
+        }
+
+        post.setTags(tags);
         postService.updatePost(id, post);
         return "redirect:/posts";
     }
+
+
 
     // Delete post
     @PostMapping("/{id}/delete")

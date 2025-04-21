@@ -24,17 +24,36 @@ public interface PostRepository  extends JpaRepository<Post, Long>, JpaSpecifica
 //            @Param("endOfDay") LocalDateTime endOfDay,
 //            Pageable pageable);
 
-    // Find by author only (when no date filter is applied)
+    // Find by author and tag
+    @Query("SELECT DISTINCT p FROM Post p JOIN p.tags t WHERE (:author = '' OR p.author LIKE %:author%) AND (:tag = '' OR t.name = :tag)")
+    Page<Post> findByAuthorAndTag(
+            @Param("author") String author,
+            @Param("tag") String tag,
+            Pageable pageable
+    );
+
+    // Find by author, tag, and published date
+    @Query("SELECT DISTINCT p FROM Post p JOIN p.tags t WHERE (:author = '' OR p.author LIKE %:author%) AND " +
+            "(:tag = '' OR t.name = :tag) AND " +
+            "p.publishedAt BETWEEN :startOfDay AND :endOfDay")
+    Page<Post> findByAuthorTagAndPublishedDate(
+            @Param("author") String author,
+            @Param("tag") String tag,
+            @Param("startOfDay") LocalDateTime startOfDay,
+            @Param("endOfDay") LocalDateTime endOfDay,
+            Pageable pageable
+    );
+
+    // Case: No tag, just author
     @Query("SELECT p FROM Post p WHERE (:author = '' OR p.author LIKE %:author%)")
     Page<Post> findByAuthorContaining(@Param("author") String author, Pageable pageable);
 
-    // Find by both author and published date
+    // Case: No tag, author + published date
     @Query("SELECT p FROM Post p WHERE (:author = '' OR p.author LIKE %:author%) AND " +
             "p.publishedAt BETWEEN :startOfDay AND :endOfDay")
-    Page<Post> findByAuthorAndPublishedDate(
-            @Param("author") String author,
-            @Param("startOfDay") LocalDateTime startOfDay,
-            @Param("endOfDay") LocalDateTime endOfDay,
-            Pageable pageable);
+    Page<Post> findByAuthorAndPublishedDate(@Param("author") String author,
+                                            @Param("startOfDay") LocalDateTime startOfDay,
+                                            @Param("endOfDay") LocalDateTime endOfDay,
+                                            Pageable pageable);
 
 }
