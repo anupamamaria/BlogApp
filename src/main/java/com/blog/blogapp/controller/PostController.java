@@ -40,6 +40,7 @@ public class PostController {
                             @RequestParam(defaultValue = "") List<String> authors,
                             @RequestParam(defaultValue = "") List<String> tags,
                             @RequestParam(defaultValue = "") String publishedDate,
+                            @RequestParam(required = false) String search,
                             @RequestParam(defaultValue = "0") int page,
                             Model model) {
 //        List<Post> posts = postService.findAllPosts();
@@ -69,7 +70,8 @@ public class PostController {
         }
 
 
-        Page<Post> postPage = postService.getFilteredPosts(authors, tags, startOfDayTime, endOfDayTime, pageable);
+
+        Page<Post> postPage = postService.getFilteredPosts(authors, tags, startOfDayTime, endOfDayTime, search,pageable);
 
 
         model.addAttribute("postPage", postPage);

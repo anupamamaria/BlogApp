@@ -21,20 +21,66 @@ public interface PostRepository  extends JpaRepository<Post, Long>, JpaSpecifica
 
 
 
+//    @Query("SELECT DISTINCT p FROM Post p " +
+//            "LEFT JOIN p.tags t " +
+//            "WHERE (:#{#authors == null or #authors.isEmpty()} = true OR p.author IN :authors) " +
+//            "AND (:#{#tags == null or #tags.isEmpty()} = true OR t.name IN :tags) " +
+//            "AND (CAST(:startDate AS timestamp) IS NULL OR p.publishedAt >= :startDate) " +
+//            "AND (CAST(:endDate AS timestamp) IS NULL OR p.publishedAt <= :endDate) " +
+//            "GROUP BY p " +
+//            "HAVING (:#{#tags == null or #tags.isEmpty()} = true OR COUNT(DISTINCT t.name) = :#{#tags.size()})")
+//    Page<Post> findPostsWithFiltersAndAllTags(
+//            @Param("authors") List<String> authors,
+//            @Param("tags") List<String> tags,
+//            @Param("startDate") LocalDateTime startDate,
+//            @Param("endDate") LocalDateTime endDate,
+//            Pageable pageable
+//    );
+
+//    @Query("SELECT DISTINCT p FROM Post p " +
+//            "LEFT JOIN p.tags t " +
+//            "WHERE (:#{#authors == null or #authors.isEmpty()} = true OR p.author IN :authors) " +
+//            "AND (:#{#tags == null or #tags.isEmpty()} = true OR t.name IN :tags) " +
+//            "AND (CAST(:startDate AS timestamp) IS NULL OR p.publishedAt >= :startDate) " +
+//            "AND (CAST(:endDate AS timestamp) IS NULL OR p.publishedAt <= :endDate) " +
+//            "AND (:searchTerm IS NULL OR " +
+//            "p.title ILIKE CONCAT('%', CAST(:searchTerm AS string), '%') OR " +
+//            "p.content ILIKE CONCAT('%', CAST(:searchTerm AS string), '%') OR " +
+//            "p.author ILIKE CONCAT('%', CAST(:searchTerm AS string), '%') OR " +
+//            "t.name ILIKE CONCAT('%', CAST(:searchTerm AS string), '%')) " +
+//            "GROUP BY p " +
+//            "HAVING (:#{#tags == null or #tags.isEmpty()} = true OR COUNT(DISTINCT t.name) = :#{#tags.size()})")
+//    Page<Post> findPostsWithFiltersSearchAndAllTags(
+//            @Param("authors") List<String> authors,
+//            @Param("tags") List<String> tags,
+//            @Param("startDate") LocalDateTime startDate,
+//            @Param("endDate") LocalDateTime endDate,
+//            @Param("searchTerm") String searchTerm,
+//            Pageable pageable
+//    );
+
+
     @Query("SELECT DISTINCT p FROM Post p " +
             "LEFT JOIN p.tags t " +
             "WHERE (:#{#authors == null or #authors.isEmpty()} = true OR p.author IN :authors) " +
             "AND (:#{#tags == null or #tags.isEmpty()} = true OR t.name IN :tags) " +
             "AND (CAST(:startDate AS timestamp) IS NULL OR p.publishedAt >= :startDate) " +
             "AND (CAST(:endDate AS timestamp) IS NULL OR p.publishedAt <= :endDate) " +
+            "AND (:searchTerm IS NULL OR :searchTerm = '' OR "+
+            "CONCAT(' ', p.title, ' ') ILIKE CONCAT('% ', CAST(:searchTerm AS string), ' %') OR " +
+            "CONCAT(' ', p.content, ' ') ILIKE CONCAT('% ', CAST(:searchTerm AS string), ' %') OR " +
+            "CONCAT(' ', p.author, ' ') ILIKE CONCAT('% ', CAST(:searchTerm AS string), ' %') OR " +
+            "CONCAT(' ', t.name, ' ') ILIKE CONCAT('% ', CAST(:searchTerm AS string), ' %')) " +
             "GROUP BY p " +
             "HAVING (:#{#tags == null or #tags.isEmpty()} = true OR COUNT(DISTINCT t.name) = :#{#tags.size()})")
-    Page<Post> findPostsWithFiltersAndAllTags(
+    Page<Post> findPostsWithFiltersSearchAndAllTags(
             @Param("authors") List<String> authors,
             @Param("tags") List<String> tags,
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
+            @Param("searchTerm") String searchTerm,
             Pageable pageable
     );
+
 
 }

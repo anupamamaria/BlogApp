@@ -27,11 +27,12 @@ public class PostService {
 
 
     public Page<Post> getFilteredPosts(List<String> authors, List<String> tags,
-                                       LocalDateTime startOfDay, LocalDateTime endOfDay,
+                                       LocalDateTime startOfDay, LocalDateTime endOfDay, String searchTerm,
                                        Pageable pageable) {
 
         //if (startOfDay != null && endOfDay != null) {
-            return postRepository.findPostsWithFiltersAndAllTags(authors, tags, startOfDay, endOfDay, pageable);
+//            return postRepository.findPostsWithFiltersAndAllTags(authors, tags, startOfDay, endOfDay, pageable);
+        return postRepository.findPostsWithFiltersSearchAndAllTags(authors, tags, startOfDay, endOfDay, searchTerm,pageable);
        // }
 //        else {
 //            return postRepository.findPostsWithFiltersNoDate(authors, tags, startOfDay, endOfDay, pageable);

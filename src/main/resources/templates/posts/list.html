@@ -8,7 +8,7 @@
 <h1>All Blog Posts</h1>
 <a th:href="@{/posts/create}">Create New Post</a>
 
-<form method="get" th:action="@{/posts}">
+<form method="get" th:action="@{/posts}" id="filterForm">
 <!--    <label for="author">Author:</label>-->
 <!--    <input type="text" id="author" name="author" th:value="${param.author}"/>-->
 
@@ -41,7 +41,7 @@
 <!--    <input type="date" id="publishedDate" name="publishedDate" th:value="${param.publishedDate}"/>-->
 
 <!--    <button type="submit">Filter</button>-->
-
+    <input type="text" name="search" placeholder="Search" th:value="${param.search}" />
     <div class="filter-container">
         <details>
             <summary>Filter</summary>
@@ -75,6 +75,15 @@
             </div>
         </details>
     </div>
+
+    <!-- Sort Dropdown -->
+    <select name="sortOrder" id="sortOrder" onchange="document.getElementById('filterForm').submit();">
+        <option value="">Sort</option>
+        <option value="desc" th:selected="${param.sortOrder == 'desc'}">Newest First</option>
+        <option value="asc" th:selected="${param.sortOrder == 'asc'}">Oldest First</option>
+    </select>
+
+    <input type="hidden" name="sortBy" value="publishedAt" />
 </form>
 
 
