@@ -1,19 +1,146 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <title>Edit Post</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<h1>Edit Post</h1>-->
+<!--<form th:action="@{'/posts/' + ${post.id} + '/update'}" th:object="${post}" method="post">-->
+<!--    <label>Title: <input type="text" th:field="*{title}" /></label><br>-->
+<!--&lt;!&ndash;    <label>Excerpt: <input type="text" th:field="*{excerpt}" /></label><br>&ndash;&gt;-->
+<!--    <label>Content: <textarea th:field="*{content}"></textarea></label><br>-->
+<!--    <label>Author: <input type="text" th:field="*{author}" /></label><br>-->
+<!--&lt;!&ndash;    <label>Published At: <input type="datetime-local" th:field="*{publishedAt}" /></label><br>&ndash;&gt;-->
+<!--    <label>Tags: <input type="text" name="tagString" th:value="${tagString}" placeholder="Enter tags separated by commas" /></label><br>-->
+<!--    <button type="submit">Update</button>-->
+<!--</form>-->
+<!--</body>-->
+<!--</html>-->
+
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Edit Post</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+
+        .browser-frame {
+            max-width: 1000px;
+            margin: 20px auto;
+            background-color: #333;
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+
+        .browser-header {
+            display: flex;
+            padding: 10px;
+            border-bottom: 1px solid #444;
+        }
+
+        .browser-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #ccc;
+        }
+
+        .title-bar {
+            flex-grow: 1;
+            text-align: center;
+            color: white;
+            font-size: 14px;
+        }
+
+        .browser-content {
+            background-color: white;
+            padding: 20px;
+        }
+
+        .address-bar {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+        }
+
+        .page-title {
+            text-align: center;
+            font-size: 36px;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+        }
+
+        textarea {
+            height: 300px;
+            resize: vertical;
+        }
+
+        .submit-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        button[type="submit"] {
+            padding: 12px 30px;
+            background-color: white;
+            border: 1px solid #333;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
 </head>
 <body>
-<h1>Edit Post</h1>
-<form th:action="@{'/posts/' + ${post.id} + '/update'}" th:object="${post}" method="post">
-    <label>Title: <input type="text" th:field="*{title}" /></label><br>
-    <label>Excerpt: <input type="text" th:field="*{excerpt}" /></label><br>
-    <label>Content: <textarea th:field="*{content}"></textarea></label><br>
-    <label>Author: <input type="text" th:field="*{author}" /></label><br>
-    <label>Published At: <input type="datetime-local" th:field="*{publishedAt}" /></label><br>
-    <label>Tags: <input type="text" name="tagString" th:value="${tagString}" placeholder="Enter tags separated by commas" /></label><br>
-    <button type="submit">Update</button>
-</form>
+<div class="browser-frame">
+    <div class="browser-header">
+        <div class="browser-dots">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+        <div class="title-bar">Site Title</div>
+    </div>
+    <div class="browser-content">
+        <input type="text" class="address-bar" value="/newpost" readonly>
+
+        <h1 class="page-title">New/Edit post</h1>
+
+        <form th:action="@{'/posts/' + ${post.id} + '/update'}" th:object="${post}" method="post">
+            <input type="text" th:field="*{title}" placeholder="Title">
+
+            <input type="text" name="tagString" th:value="${tagString}" placeholder="Tags">
+
+            <textarea th:field="*{content}"></textarea>
+
+            <!-- Hidden author field - keeping the functionality but not showing it in the UI per your design -->
+            <input type="hidden" th:field="*{author}">
+
+            <div class="submit-container">
+                <button type="submit">Publish</button>
+            </div>
+        </form>
+    </div>
+</div>
 </body>
 </html>

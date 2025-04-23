@@ -39,7 +39,8 @@ public class PostController {
                             @RequestParam(defaultValue = "desc") String sortOrder,
                             @RequestParam(defaultValue = "") List<String> authors,
                             @RequestParam(defaultValue = "") List<String> tags,
-                            @RequestParam(defaultValue = "") String publishedDate,
+                            @RequestParam(required = false) String startDate,
+                            @RequestParam(required = false) String endDate,
                             @RequestParam(required = false) String search,
                             @RequestParam(defaultValue = "0") int page,
                             Model model) {
@@ -59,15 +60,23 @@ public class PostController {
         LocalDateTime endOfDayTime = null;
 
 
-        if (!publishedDate.isEmpty()) {
+
+        if (startDate != null && !startDate.isEmpty()) {
             try {
-                LocalDate date = LocalDate.parse(publishedDate);
-                startOfDayTime = date.atStartOfDay();
-                endOfDayTime = date.atTime(LocalTime.MAX);
+                startOfDayTime = LocalDate.parse(startDate).atStartOfDay();
             } catch (Exception e) {
-                System.out.println("Invalid date format: " + e.getMessage());
+                System.out.println("Invalid start date format: " + e.getMessage());
             }
         }
+
+        if (endDate != null && !endDate.isEmpty()) {
+            try {
+                endOfDayTime = LocalDate.parse(endDate).atTime(LocalTime.MAX);
+            } catch (Exception e) {
+                System.out.println("Invalid end date format: " + e.getMessage());
+            }
+        }
+
 
 
 
@@ -82,11 +91,13 @@ public class PostController {
         // Preserve filters/sorting in the view
         model.addAttribute("authors", authors);
         model.addAttribute("tags", tags);
-        model.addAttribute("publishedDate", publishedDate);
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
         model.addAttribute("sortBy", sortBy);
         model.addAttribute("sortOrder", sortOrder);
         model.addAttribute("allTags", tagRepository.findAll());
         model.addAttribute("allAuthors", postService.findAllAuthors());
+        model.addAttribute("search",search);
 
 
         return "posts/list";

@@ -24,7 +24,7 @@ public class Post {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "post_tags",
             joinColumns = @JoinColumn(name = "post_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
@@ -123,4 +123,10 @@ public class Post {
     public void setComments(List<Comment> comments) {
         this.comments = comments;
     }
+    public void generateExcerpt() {
+        if (this.content != null) {
+            this.excerpt = this.content.length() > 250 ? this.content.substring(0,250) + "..." : this.content;
+        }
+    }
+
 }

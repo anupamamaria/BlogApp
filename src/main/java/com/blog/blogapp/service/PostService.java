@@ -60,7 +60,9 @@ public class PostService {
 
     public Post createPost(Post post) {
         post.setCreatedAt(java.time.LocalDateTime.now());
+        post.setPublishedAt(java.time.LocalDateTime.now());
         post.setUpdatedAt(java.time.LocalDateTime.now());
+        post.generateExcerpt();
         return postRepository.save(post);
     }
 
@@ -70,9 +72,8 @@ public class PostService {
         Post post = postRepository.findById(id).orElseThrow();
         post.setTitle(postDetails.getTitle());
         post.setContent(postDetails.getContent());
-        post.setExcerpt(postDetails.getExcerpt());
+        post.generateExcerpt();
         post.setAuthor(postDetails.getAuthor());
-        post.setPublishedAt(postDetails.getPublishedAt());
         post.setUpdatedAt(java.time.LocalDateTime.now());
         post.setTags(postDetails.getTags());
         return postRepository.save(post);

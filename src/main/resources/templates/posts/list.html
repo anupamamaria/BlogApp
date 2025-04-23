@@ -3,91 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <title>All Blog Posts</title>
+
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .filter-container {
+            margin-bottom: 1rem;
+        }
+
+        .filter-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            padding: 1rem 0;
+        }
+
+        .filter-group {
+            min-width: 200px;
+        }
+.blog-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.blog-card {
+    border: 1px solid #ccc;
+    padding: 16px;
+    border-radius: 8px;
+    background-color: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+<!--        .pagination a {-->
+<!--            margin: 0 0.3rem;-->
+<!--            text-decoration: none;-->
+<!--        }-->
+
+<!--        .active {-->
+<!--            font-weight: bold;-->
+<!--            text-decoration: underline;-->
+<!--        }-->
+
+
+.pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    padding: 10px 0;
+    font-size: 14px;
+    color: black;
+}
+
+.pagination a {
+    color: black;
+    text-decoration: none;
+}
+
+    </style>
+
 </head>
 <body>
-<h1>All Blog Posts</h1>
-<a th:href="@{/posts/create}">Create New Post</a>
 
-<form method="get" th:action="@{/posts}" id="filterForm">
-<!--    <label for="author">Author:</label>-->
-<!--    <input type="text" id="author" name="author" th:value="${param.author}"/>-->
-
-<!--    <label for="tag">Tag:</label>-->
-<!--    <select id="tag" name="tag">-->
-<!--        <option value="">&#45;&#45; All Tags &#45;&#45;</option>-->
-<!--        <option th:each="tagObj : ${allTags}"-->
-<!--                th:value="${tagObj.name}"-->
-<!--                th:text="${tagObj.name}"-->
-<!--                th:selected="${tagObj.name == tag}"></option>-->
-<!--    </select>-->
-
-
-<!--    <label for="author">Author:</label>-->
-<!--    <select id="author" name="authors" multiple>-->
-<!--        <option th:each="authorObj : ${allAuthors}"-->
-<!--                th:value="${authorObj}"-->
-<!--                th:text="${authorObj}"></option>-->
-<!--    </select>-->
-
-<!--    <label for="tag">Tag:</label>-->
-<!--    <select id="tag" name="tags" multiple>-->
-<!--        <option th:each="tagObj : ${allTags}"-->
-<!--                th:value="${tagObj.name}"-->
-<!--                th:text="${tagObj.name}"></option>-->
-<!--    </select>-->
-
-
-<!--    <label for="publishedDate">Published Date:</label>-->
-<!--    <input type="date" id="publishedDate" name="publishedDate" th:value="${param.publishedDate}"/>-->
-
-<!--    <button type="submit">Filter</button>-->
-    <input type="text" name="search" placeholder="Search" th:value="${param.search}" />
-    <div class="filter-container">
-        <details>
-            <summary>Filter</summary>
-            <div class="filter-options">
-                <div class="filter-group">
-                    <h4>Authors:</h4>
-                    <select name="authors" multiple>
-                        <option th:each="authorObj : ${allAuthors}"
-                                th:value="${authorObj}"
-                                th:text="${authorObj}"
-                                th:selected="${authors != null && authors.contains(authorObj)}"></option>
-                    </select>
-                </div>
-
-                <div class="filter-group">
-                    <h4>Tags:</h4>
-                    <select name="tags" multiple>
-                        <option th:each="tagObj : ${allTags}"
-                                th:value="${tagObj.name}"
-                                th:text="${tagObj.name}"
-                                th:selected="${tags != null && tags.contains(tagObj.name)}"></option>
-                    </select>
-                </div>
-
-                <div class="filter-group">
-                    <h4>Published Date:</h4>
-                    <input type="date" name="publishedDate" th:value="${publishedDate}">
-                </div>
-
-                <button type="submit">Apply Filters</button>
-            </div>
-        </details>
+<div class="header-container" style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <div>
+     <h1>All Blog Posts</h1>
+     <a th:href="@{/posts/create}">Create New Post</a>
     </div>
 
-    <!-- Sort Dropdown -->
-    <select name="sortOrder" id="sortOrder" onchange="document.getElementById('filterForm').submit();">
-        <option value="">Sort</option>
-        <option value="desc" th:selected="${param.sortOrder == 'desc'}">Newest First</option>
-        <option value="asc" th:selected="${param.sortOrder == 'asc'}">Oldest First</option>
-    </select>
+    <form method="get" th:action="@{/posts}" id="filterForm">
+        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 20px;">
 
-    <input type="hidden" name="sortBy" value="publishedAt" />
-</form>
+            <input type="text" name="search" placeholder="Search" th:value="${param.search}" />
+
+            <div style="display: flex; gap: 10px; align-items: flex-start; position: relative;">
+
+                <!-- Floating Dropdown -->
+                <div style="position: relative;">
+                    <div style="border: 1px solid #000; padding: 4px 10px; cursor: pointer;">
+                        <details style="position: relative;">
+                            <summary>Filter</summary>
+                            <div style="position: absolute; top: 100%; right: 0; background: #fff; border: 1px solid #000; padding: 10px; z-index: 10; width: 250px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+
+                                <!-- Authors -->
+                                <details>
+                                    <summary>Authors</summary>
+                                    <div th:each="authorObj : ${allAuthors}">
+                                        <label>
+                                            <input type="checkbox" name="authors" th:value="${authorObj}"
+                                                   th:checked="${authors != null && authors.contains(authorObj)}">
+                                            <span th:text="${authorObj}"></span>
+                                        </label>
+                                    </div>
+                                </details>
+
+                                <!-- Tags -->
+                                <details>
+                                    <summary>Tags</summary>
+                                    <div th:each="tagObj : ${allTags}">
+                                        <label>
+                                            <input type="checkbox" name="tags" th:value="${tagObj.name}"
+                                                   th:checked="${tags != null && tags.contains(tagObj.name)}">
+                                            <span th:text="${tagObj.name}"></span>
+                                        </label>
+                                    </div>
+                                </details>
+
+                                <!-- Dates -->
+                                <div>
+                                    <h4>Published Date:</h4>
+                                    <label>Start: <input type="date" name="startDate" th:value="${startDate}"></label><br>
+                                    <label>End: <input type="date" name="endDate" th:value="${endDate}"></label>
+                                </div>
+
+                                <button type="submit" style="margin-top: 10px;">Apply Filters</button>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+
+                <!-- Sort Dropdown -->
+                <select name="sortOrder" id="sortOrder" onchange="document.getElementById('filterForm').submit();">
+                    <option value="">Sort</option>
+                    <option value="desc" th:selected="${param.sortOrder == 'desc'}">Newest First</option>
+                    <option value="asc" th:selected="${param.sortOrder == 'asc'}">Oldest First</option>
+                </select>
+
+                <input type="hidden" name="sortBy" value="publishedAt" />
+            </div>
+        </div>
+    </form>
 
 
-<div th:each="post : ${postPage.content}">
+    <!--<form method="get" th:action="@{/posts}" id="filterForm">-->
+<!--    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 20px;">-->
+
+<!--    <input type="text" name="search" placeholder="Search" th:value="${param.search}" />-->
+
+<!--        <div style="display: flex; gap: 20px;">-->
+<!--    <div class="filter-container" style="border: 1px solid #000; padding: 2px 10px; min-width: 80px; text-align: center;">-->
+<!--        <details>-->
+<!--            <summary>Filter</summary>-->
+<!--            <div class="filter-options">-->
+<!--                <div class="filter-group">-->
+
+<!--                    &lt;!&ndash; Authors Filter &ndash;&gt;-->
+<!--                    <div class="filter-group">-->
+<!--                        <h4>Authors:</h4>-->
+<!--                        <div th:each="authorObj : ${allAuthors}">-->
+<!--                            <label>-->
+<!--                                <input type="checkbox" name="authors" th:value="${authorObj}"-->
+<!--                                       th:checked="${authors != null && authors.contains(authorObj)}">-->
+<!--                                <span th:text="${authorObj}"></span>-->
+<!--                            </label>-->
+<!--                        </div>-->
+<!--                    </div>-->
+
+<!--                    &lt;!&ndash; Tags Filter &ndash;&gt;-->
+<!--                    <div class="filter-group">-->
+<!--                        <h4>Tags:</h4>-->
+<!--                        <div th:each="tagObj : ${allTags}">-->
+<!--                            <label>-->
+<!--                                <input type="checkbox" name="tags" th:value="${tagObj.name}"-->
+<!--                                       th:checked="${tags != null && tags.contains(tagObj.name)}">-->
+<!--                                <span th:text="${tagObj.name}"></span>-->
+<!--                            </label>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    &lt;!&ndash; Date Filter &ndash;&gt;-->
+<!--                </div>-->
+
+<!--                <div class="filter-group">-->
+<!--                    <h4>Published Date Range:</h4>-->
+<!--                    <label for="startDate">Start:</label>-->
+<!--                    <input type="date" name="startDate" id="startDate" th:value="${startDate}">-->
+
+<!--                    <label for="endDate">End:</label>-->
+<!--                    <input type="date" name="endDate" id="endDate" th:value="${endDate}">-->
+<!--                </div>-->
+
+
+<!--                <button type="submit">Apply Filters</button>-->
+<!--            </div>-->
+<!--        </details>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Sort Dropdown &ndash;&gt;-->
+<!--    <select name="sortOrder" id="sortOrder" onchange="document.getElementById('filterForm').submit();" >-->
+<!--        <option value="">Sort</option>-->
+<!--        <option value="desc" th:selected="${param.sortOrder == 'desc'}">Newest First</option>-->
+<!--        <option value="asc" th:selected="${param.sortOrder == 'asc'}">Oldest First</option>-->
+<!--    </select>-->
+
+<!--    <input type="hidden" name="sortBy" value="publishedAt" />-->
+<!--    </div>-->
+<!--    </div>-->
+<!--</form>-->
+</div>
+
+
+<div class="blog-container">
+    <div class="blog-card" th:each="post : ${postPage.content}">
     <h2 th:text="${post.title}"></h2>
     <p th:text="${post.excerpt}"></p>
     <p>Author: <span th:text="${post.author}"></span></p>
@@ -102,24 +224,57 @@
     <form th:action="@{'/posts/' + ${post.id} + '/delete'}" method="post">
         <button type="submit">Delete</button>
     </form>
-    <hr>
+
 </div>
+</div>
+<!--<div>-->
+<!--    <span th:text="'Page ' + ${postPage.number + 1} + ' of ' + ${postPage.totalPages}"></span>-->
 
-<div>
-    <span th:text="'Page ' + ${postPage.number + 1} + ' of ' + ${postPage.totalPages}"></span>
+<!--    <div>-->
+<!--        <a th:if="${postPage.hasPrevious()}"-->
+<!--           th:href="@{/posts(page=${postPage.number - 1})}">Previous</a>-->
 
-    <div>
+<!--        <span th:each="i : ${#numbers.sequence(0, postPage.totalPages - 1)}">-->
+<!--            <a th:href="@{/posts(page=${i})}"-->
+<!--               th:text="${i + 1}"-->
+<!--               th:classappend="${i == postPage.number} ? 'active'"> </a>-->
+<!--        </span>-->
+
+<!--        <a th:if="${postPage.hasNext()}"-->
+<!--           th:href="@{/posts(page=${postPage.number + 1})}">Next</a>-->
+<!--    </div>-->
+<!--</div>-->
+
+<div class="pagination">
+    <!-- Left: Previous -->
+    <div class="pagination-left">
         <a th:if="${postPage.hasPrevious()}"
-           th:href="@{/posts(page=${postPage.number - 1})}">Previous</a>
+           th:href="@{/posts(page=${postPage.number - 1},
+                    sortBy=${sortBy},
+                    sortOrder=${sortOrder},
+                    startDate=${startDate},
+                    endDate=${endDate},
+                    authors=${authors},
+                    tags=${tags},
+                    search=${search})}">&lt; Previous</a>
+    </div>
 
-        <span th:each="i : ${#numbers.sequence(0, postPage.totalPages - 1)}">
-            <a th:href="@{/posts(page=${i})}"
-               th:text="${i + 1}"
-               th:classappend="${i == postPage.number} ? 'active'"> </a>
-        </span>
+    <!-- Center: Page Info -->
+    <div class="pagination-center">
+        <span th:text="'Page ' + ${postPage.number + 1} + ' of ' + ${postPage.totalPages}"></span>
+    </div>
 
+    <!-- Right: Next -->
+    <div class="pagination-right">
         <a th:if="${postPage.hasNext()}"
-           th:href="@{/posts(page=${postPage.number + 1})}">Next</a>
+           th:href="@{/posts(page=${postPage.number + 1},
+                    sortBy=${sortBy},
+                    sortOrder=${sortOrder},
+                    startDate=${startDate},
+                    endDate=${endDate},
+                    authors=${authors},
+                    tags=${tags},
+                    search=${search})}">Next &gt;</a>
     </div>
 </div>
 
