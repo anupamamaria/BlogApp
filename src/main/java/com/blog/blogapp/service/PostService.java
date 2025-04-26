@@ -1,6 +1,7 @@
 package com.blog.blogapp.service;
 import com.blog.blogapp.entity.Post;
 import com.blog.blogapp.entity.Tag;
+import com.blog.blogapp.entity.User;
 import com.blog.blogapp.repository.PostRepository;
 import com.blog.blogapp.repository.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,13 +31,7 @@ public class PostService {
                                        LocalDateTime startOfDay, LocalDateTime endOfDay, String searchTerm,
                                        Pageable pageable) {
 
-        //if (startOfDay != null && endOfDay != null) {
-//            return postRepository.findPostsWithFiltersAndAllTags(authors, tags, startOfDay, endOfDay, pageable);
         return postRepository.findPostsWithFiltersSearchAndAllTags(authors, tags, startOfDay, endOfDay, searchTerm,pageable);
-       // }
-//        else {
-//            return postRepository.findPostsWithFiltersNoDate(authors, tags, startOfDay, endOfDay, pageable);
-//       }
     }
 
     public List<String> findAllAuthors() {
@@ -44,9 +39,9 @@ public class PostService {
         Set<String> authors = new HashSet<>(); // Use a Set to ensure uniqueness
 
         for (Post post : posts) {
-            String author = post.getAuthor();
-            if (author != null && !authors.contains(author)) {
-                authors.add(author); // Add the author to the Set if not already present
+            User author = post.getAuthor();
+            if (author.getName() != null && !authors.contains(author.getName())) {
+                authors.add(author.getName()); // Add the author to the Set if not already present
             }
         }
 
@@ -54,7 +49,7 @@ public class PostService {
     }
 
 
-    public Optional<Post> findPostById(Long id) {
+    public Optional<Post> findPostById(int id) {
         return postRepository.findById(id);
     }
 
@@ -68,7 +63,7 @@ public class PostService {
 
 
 
-    public Post updatePost(Long id, Post postDetails) {
+    public Post updatePost(int id, Post postDetails) {
         Post post = postRepository.findById(id).orElseThrow();
         post.setTitle(postDetails.getTitle());
         post.setContent(postDetails.getContent());
@@ -80,21 +75,21 @@ public class PostService {
     }
 
     // Helper methods for tag management
-    public Post addTagToPost(Long postId, Long tagId) {
+    public Post addTagToPost(int postId, int tagId) {
         Post post = postRepository.findById(postId).orElseThrow();
         Tag tag = tagRepository.findById(tagId).orElseThrow();
         post.getTags().add(tag);
         return postRepository.save(post);
     }
 
-    public Post removeTagFromPost(Long postId, Long tagId) {
+    public Post removeTagFromPost(int postId, int tagId) {
         Post post = postRepository.findById(postId).orElseThrow();
-        post.getTags().removeIf(tag -> tag.getId().equals(tagId));
+        post.getTags().removeIf(tag -> tag.getId()==(tagId));
         return postRepository.save(post);
     }
 
 
-    public void deletePost(Long id) {
+    public void deletePost(int id) {
         postRepository.deleteById(id);
     }
 }

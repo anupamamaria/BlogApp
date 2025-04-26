@@ -2,9 +2,11 @@ package com.blog.blogapp.controller;
 import com.blog.blogapp.entity.Post;
 import com.blog.blogapp.entity.Comment;
 import com.blog.blogapp.entity.Tag;
+import com.blog.blogapp.entity.User;
 import com.blog.blogapp.repository.TagRepository;
 import com.blog.blogapp.service.PostService;
 import com.blog.blogapp.service.CommentService;
+import com.blog.blogapp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -26,6 +29,13 @@ import java.util.stream.Collectors;
 public class PostController {
     @Autowired
     private PostService postService;
+
+    private final UserService userService;
+
+    @Autowired
+    public PostController(UserService userService) {
+        this.userService = userService;
+    }
 
     @Autowired
     private TagRepository tagRepository;
@@ -43,10 +53,14 @@ public class PostController {
                             @RequestParam(required = false) String endDate,
                             @RequestParam(required = false) String search,
                             @RequestParam(defaultValue = "0") int page,
-                            Model model) {
-//        List<Post> posts = postService.findAllPosts();
-//        model.addAttribute("posts", posts);
-//        return "posts/list"; // Thymeleaf template
+                            Model model , Principal principal){
+
+
+        User loggedInUser = null;
+        if (principal != null) {
+            String email = principal.getName();  // Get the logged-in user's email
+            loggedInUser = userService.findByEmail(email); // Find the logged-in user
+        }
 
         int pageSize = 10; // max 10 posts per page
         Sort sort = sortOrder.equalsIgnoreCase("asc") ?
@@ -76,17 +90,11 @@ public class PostController {
                 System.out.println("Invalid end date format: " + e.getMessage());
             }
         }
-
-
-
-
         Page<Post> postPage = postService.getFilteredPosts(authors, tags, startOfDayTime, endOfDayTime, search,pageable);
-
 
         model.addAttribute("postPage", postPage);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", postPage.getTotalPages());
-
 
         // Preserve filters/sorting in the view
         model.addAttribute("authors", authors);
@@ -99,32 +107,25 @@ public class PostController {
         model.addAttribute("allAuthors", postService.findAllAuthors());
         model.addAttribute("search",search);
 
-
+        model.addAttribute("loggedInUser", loggedInUser);
         return "posts/list";
     }
 
-    // View single post with comments
-//    @GetMapping("/{id}")
-//    public String viewPost(@PathVariable Long id, Model model) {
-//        Post post = postService.findPostById(id).orElseThrow();
-//        List<Comment> comments = commentService.findCommentsByPost(post);
-//
-//        Comment newComment = new Comment();
-//        newComment.setPost(post);
-//
-//        model.addAttribute("post", post);
-//        model.addAttribute("comments", comments);
-//        model.addAttribute("comment", newComment);
-//
-//        return "posts/view";
-//    }
     @GetMapping("/{id}")
-    public String viewPost(@PathVariable Long id, Model model) {
+    public String viewPost(@PathVariable int id, Model model, Principal principal) {
+
+        User loggedInUser = null;
+        if (principal != null) {
+            String email = principal.getName();  // Get the logged-in user's email
+            loggedInUser = userService.findByEmail(email); // Find the logged-in user
+        }
+
         Post post = postService.findPostById(id).orElseThrow();
         List<Comment> comments = commentService.findCommentsByPost(post);
         model.addAttribute("post", post);
         model.addAttribute("comments", comments);
         model.addAttribute("commentForm", new Comment()); // Note the name "commentForm"
+        model.addAttribute("loggedInUser", loggedInUser);
         return "posts/view";
     }
 
@@ -135,17 +136,15 @@ public class PostController {
         return "posts/create";
     }
 
-    // Submit new post
-//    @PostMapping
-//    public String createPost(@ModelAttribute Post post) {
-//        postService.createPost(post);
-//        return "redirect:/posts";
-//    }
-
     // Method to handle form submission
     @PostMapping
-    public String savePost(@ModelAttribute Post post, @RequestParam("tagString") String tagString) {
+    public String savePost(@ModelAttribute Post post, @RequestParam("tagString") String tagString,Principal principal) {
         // Split the input string and create tag list
+
+        String email = principal.getName();  // Get logged-in user's email
+        User loggedInUser = userService.findByEmail(email);  // Use email to fetch logged-in user
+
+        post.setAuthor(loggedInUser);
         List<String> tagNames = new ArrayList<>();
         if (tagString != null && !tagString.isEmpty()) {
             String[] parts = tagString.split(",");
@@ -181,19 +180,21 @@ public class PostController {
         return "redirect:/posts";
     }
 
-
-
-    // Show form to edit post
-//    @GetMapping("/{id}/edit")
-//    public String showEditForm(@PathVariable Long id, Model model) {
-//        Post post = postService.findPostById(id).orElseThrow();
-//        model.addAttribute("post", post);
-//        return "posts/edit";
-//    }
-
     @GetMapping("/{id}/edit")
-    public String showEditForm(@PathVariable Long id, Model model) {
+    public String showEditForm(@PathVariable int id, Principal principal, Model model) {
         Post post = postService.findPostById(id).orElseThrow();
+        User loggedInUser = userService.findByEmail(principal.getName());
+
+        if (!post.getAuthor().getEmail().equals(loggedInUser.getEmail()) &&
+                !loggedInUser.getRole().equals("ROLE_ADMIN")) {
+            return "redirect:/login";
+        }
+
+//        User loggedInUser = null;
+//        if (principal != null) {
+//            String email = principal.getName();  // Get the logged-in user's email
+//            loggedInUser = userService.findByEmail(email); // Find the logged-in user
+//        }
 
         // Convert tags to comma-separated string
         StringBuilder tagString = new StringBuilder();
@@ -222,7 +223,13 @@ public class PostController {
 
 
     @PostMapping("/{id}/update")
-    public String updatePost(@PathVariable Long id, @ModelAttribute Post post, @RequestParam("tagString") String tagString) {
+    public String updatePost(@PathVariable int id, @ModelAttribute Post post,
+                             @RequestParam("tagString") String tagString,Principal principal) {
+
+
+        String email = principal.getName();  // Get logged-in user's email
+        User loggedInUser = userService.findByEmail(email);  // Use email to fetch logged-in user
+
         // Split the input string and create tag list
         List<String> tagNames = new ArrayList<>();
         if (tagString != null && !tagString.isEmpty()) {
@@ -264,7 +271,7 @@ public class PostController {
 
     // Delete post
     @PostMapping("/{id}/delete")
-    public String deletePost(@PathVariable Long id) {
+    public String deletePost(@PathVariable int id) {
         postService.deletePost(id);
         return "redirect:/posts";
     }

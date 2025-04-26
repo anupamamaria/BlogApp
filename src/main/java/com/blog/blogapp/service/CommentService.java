@@ -17,10 +17,9 @@ public class CommentService {
         return commentRepository.findByPost(post);
     }
 
-    public Optional<Comment> findById(Long id) {
+    public Optional<Comment> findById(int id) {
         return commentRepository.findById(id);
     }
-
 
     public Comment createComment(Comment comment) {
         comment.setCreatedAt(java.time.LocalDateTime.now());
@@ -28,14 +27,14 @@ public class CommentService {
         return commentRepository.save(comment);
     }
 
-    public Comment updateComment(Long id, Comment updatedComment) {
+    public Comment updateComment(int id, Comment updatedComment) {
         Comment comment = commentRepository.findById(id).orElseThrow();
         comment.setComment(updatedComment.getComment());
         comment.setUpdatedAt(java.time.LocalDateTime.now());
         return commentRepository.save(comment);
     }
 
-    public void deleteComment(Long id) {
+    public void deleteComment(int id) {
         commentRepository.deleteById(id);
     }
 

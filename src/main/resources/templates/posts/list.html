@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
 <head>
     <meta charset="UTF-8">
     <title>All Blog Posts</title>
@@ -40,6 +40,12 @@
     background-color: white;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
+.text-muted {
+    color: gray;
+    font-style: italic;
+    opacity: 0.7;
+}
+
 <!--        .pagination a {-->
 <!--            margin: 0 0.3rem;-->
 <!--            text-decoration: none;-->
@@ -74,13 +80,28 @@
 <div class="header-container" style="display: flex; justify-content: space-between; align-items: flex-start;">
     <div>
      <h1>All Blog Posts</h1>
+        <div sec:authorize="hasAnyRole('ADMIN', 'AUTHOR')">
      <a th:href="@{/posts/create}">Create New Post</a>
+            </div>
+    </div>
+
+    <div>
+        <div sec:authorize="isAuthenticated()">
+            <form th:action="@{/logout}" method="post" style="display:inline;">
+                <button type="submit" style="background:none; border:none; color:blue; text-decoration:underline; cursor:pointer;">Logout</button>
+            </form>
+        </div>
+
+        <div sec:authorize="isAnonymous()">
+            <a th:href="@{/login}">Login</a>
+        </div>
     </div>
 
     <form method="get" th:action="@{/posts}" id="filterForm">
         <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 20px;">
 
-            <input type="text" name="search" placeholder="Search" th:value="${param.search}" />
+            <input type="text" name="search" placeholder="Search" th:value="${search}" />
+
 
             <div style="display: flex; gap: 10px; align-items: flex-start; position: relative;">
 
@@ -89,7 +110,9 @@
                     <div style="border: 1px solid #000; padding: 4px 10px; cursor: pointer;">
                         <details style="position: relative;">
                             <summary>Filter</summary>
-                            <div style="position: absolute; top: 100%; right: 0; background: #fff; border: 1px solid #000; padding: 10px; z-index: 10; width: 250px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            <div style="position: absolute; top: 100%; right: 0; background: #fff;
+                            border: 1px solid #000; padding: 10px; z-index: 10; width: 250px;
+                            box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
 
                                 <!-- Authors -->
                                 <details>
@@ -139,91 +162,30 @@
             </div>
         </div>
     </form>
-
-
-    <!--<form method="get" th:action="@{/posts}" id="filterForm">-->
-<!--    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 20px;">-->
-
-<!--    <input type="text" name="search" placeholder="Search" th:value="${param.search}" />-->
-
-<!--        <div style="display: flex; gap: 20px;">-->
-<!--    <div class="filter-container" style="border: 1px solid #000; padding: 2px 10px; min-width: 80px; text-align: center;">-->
-<!--        <details>-->
-<!--            <summary>Filter</summary>-->
-<!--            <div class="filter-options">-->
-<!--                <div class="filter-group">-->
-
-<!--                    &lt;!&ndash; Authors Filter &ndash;&gt;-->
-<!--                    <div class="filter-group">-->
-<!--                        <h4>Authors:</h4>-->
-<!--                        <div th:each="authorObj : ${allAuthors}">-->
-<!--                            <label>-->
-<!--                                <input type="checkbox" name="authors" th:value="${authorObj}"-->
-<!--                                       th:checked="${authors != null && authors.contains(authorObj)}">-->
-<!--                                <span th:text="${authorObj}"></span>-->
-<!--                            </label>-->
-<!--                        </div>-->
-<!--                    </div>-->
-
-<!--                    &lt;!&ndash; Tags Filter &ndash;&gt;-->
-<!--                    <div class="filter-group">-->
-<!--                        <h4>Tags:</h4>-->
-<!--                        <div th:each="tagObj : ${allTags}">-->
-<!--                            <label>-->
-<!--                                <input type="checkbox" name="tags" th:value="${tagObj.name}"-->
-<!--                                       th:checked="${tags != null && tags.contains(tagObj.name)}">-->
-<!--                                <span th:text="${tagObj.name}"></span>-->
-<!--                            </label>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                    &lt;!&ndash; Date Filter &ndash;&gt;-->
-<!--                </div>-->
-
-<!--                <div class="filter-group">-->
-<!--                    <h4>Published Date Range:</h4>-->
-<!--                    <label for="startDate">Start:</label>-->
-<!--                    <input type="date" name="startDate" id="startDate" th:value="${startDate}">-->
-
-<!--                    <label for="endDate">End:</label>-->
-<!--                    <input type="date" name="endDate" id="endDate" th:value="${endDate}">-->
-<!--                </div>-->
-
-
-<!--                <button type="submit">Apply Filters</button>-->
-<!--            </div>-->
-<!--        </details>-->
-<!--    </div>-->
-
-<!--    &lt;!&ndash; Sort Dropdown &ndash;&gt;-->
-<!--    <select name="sortOrder" id="sortOrder" onchange="document.getElementById('filterForm').submit();" >-->
-<!--        <option value="">Sort</option>-->
-<!--        <option value="desc" th:selected="${param.sortOrder == 'desc'}">Newest First</option>-->
-<!--        <option value="asc" th:selected="${param.sortOrder == 'asc'}">Oldest First</option>-->
-<!--    </select>-->
-
-<!--    <input type="hidden" name="sortBy" value="publishedAt" />-->
-<!--    </div>-->
-<!--    </div>-->
-<!--</form>-->
 </div>
-
 
 <div class="blog-container">
     <div class="blog-card" th:each="post : ${postPage.content}">
     <h2 th:text="${post.title}"></h2>
     <p th:text="${post.excerpt}"></p>
-    <p>Author: <span th:text="${post.author}"></span></p>
+    <p>Author: <span th:classappend="${loggedInUser != null and post.author.email == loggedInUser.email} ? 'text-muted' : ''"
+                     th:text="${post.author.name}"></span></p>
     <p>Published At: <span th:text="${post.publishedAt}"></span></p>
 
     <p>Tags:
         <span th:each="tag : ${post.tags}" th:text="${tag.name} + ' '" />
     </p>
-
-    <a th:href="@{'/posts/' + ${post.id}}">Read More</a>
+        <a th:href="@{'/posts/' + ${post.id}}">Read More</a>
+        <div sec:authorize="hasAnyRole('ADMIN', 'AUTHOR')">
+            <div th:if="${post.author.email == loggedInUser.email}">
     <a th:href="@{'/posts/' + ${post.id} + '/edit'}">Edit</a>
+            </div>
+            <div th:if="${loggedInUser.role == 'ADMIN' or post.author.email == loggedInUser.email}">
     <form th:action="@{'/posts/' + ${post.id} + '/delete'}" method="post">
         <button type="submit">Delete</button>
     </form>
+            </div>
+        </div>
 
 </div>
 </div>

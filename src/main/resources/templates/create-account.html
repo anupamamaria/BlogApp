@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Create Account</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            width: 250px;
+            gap: 10px;
+        }
+
+        input, button {
+            padding: 8px;
+            font-size: 14px;
+        }
+
+        .link {
+            margin-top: 10px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Create account</h1>
+
+<form th:action="@{/register}" th:object="${user}" method="post">
+    <input type="text" th:field="*{name}" placeholder="Name" required />
+    <input type="email" th:field="*{email}" placeholder="Email" required />
+    <input type="password" th:field="*{password}" placeholder="Password" required />
+    <input type="password" name="confirmPassword" placeholder="Confirm Password" required />
+    <input type="hidden" name="role" value="AUTHOR" />
+    <button type="submit">Submit</button>
+
+    <!-- Optional: Display success or error messages -->
+    <p th:if="${successMessage}" th:text="${successMessage}" style="color: green;"></p>
+    <p th:if="${errorMessage}" th:text="${errorMessage}" style="color: red;"></p>
+</form>
+
+
+<div class="link">
+    Have account? <a th:href="@{/login}">Login</a>
+</div>
+
+</body>
+</html>

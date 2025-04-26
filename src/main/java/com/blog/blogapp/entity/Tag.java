@@ -9,22 +9,21 @@ import java.util.*;
 public class Tag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
 
     private String name;
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @ManyToMany(mappedBy = "tags")
     private Set<Post> posts = new HashSet<>();
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-
-
-
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 

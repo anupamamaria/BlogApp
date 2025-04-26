@@ -14,19 +14,19 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface PostRepository  extends JpaRepository<Post, Long>, JpaSpecificationExecutor<Post> {
+public interface PostRepository  extends JpaRepository<Post, Integer>, JpaSpecificationExecutor<Post> {
     Page<Post> findAll(Pageable pageable);
 
     @Query("SELECT DISTINCT p FROM Post p " +
             "LEFT JOIN p.tags t " +
-            "WHERE (:#{#authors == null or #authors.isEmpty()} = true OR p.author IN :authors) " +
+            "WHERE (:#{#authors == null or #authors.isEmpty()} = true OR p.author.name IN :authors) " +
             "AND (:#{#tags == null or #tags.isEmpty()} = true OR t.name IN :tags) " +
             "AND (CAST(:startDate AS timestamp) IS NULL OR p.publishedAt >= :startDate) " +
             "AND (CAST(:endDate AS timestamp) IS NULL OR p.publishedAt <= :endDate) " +
             "AND (:searchTerm IS NULL OR :searchTerm = '' OR "+
             "CONCAT(' ', p.title, ' ') ILIKE CONCAT('% ', CAST(:searchTerm AS string), ' %') OR " +
             "CONCAT(' ', p.content, ' ') ILIKE CONCAT('% ', CAST(:searchTerm AS string), ' %') OR " +
-            "CONCAT(' ', p.author, ' ') ILIKE CONCAT('% ', CAST(:searchTerm AS string), ' %') OR " +
+            "CONCAT(' ', p.author.name, ' ') ILIKE CONCAT('% ', CAST(:searchTerm AS string), ' %') OR " +
             "CONCAT(' ', t.name, ' ') ILIKE CONCAT('% ', CAST(:searchTerm AS string), ' %')) " +
             "GROUP BY p " +
             "HAVING (:#{#tags == null or #tags.isEmpty()} = true OR COUNT(DISTINCT t.name) = :#{#tags.size()})")

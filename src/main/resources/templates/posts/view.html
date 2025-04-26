@@ -1,82 +1,134 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
-    <title>View Post</title>
+    <title th:text="${post.title}">View Post</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            border: 1px solid #ddd;
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 32px;
+        }
+        .post-meta {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .post-content {
+            line-height: 1.5;
+            margin: 0 auto;
+            width: 80%;
+        }
+        .comments-section {
+            margin-top: 30px;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+        }
+    </style>
 </head>
 <body>
-<h1 th:text="${post.title}"></h1>
-<p th:text="${post.content}"></p>
-<p>Author: <span th:text="${post.author}"></span></p>
-<p>Published At: <span th:text="${post.publishedAt}"></span></p>
+<div class="container">
+    <div class="header">
+        <div>My Blog Application</div>
+        <div>
+            <div sec:authorize="isAuthenticated()">
+                <form th:action="@{/logout}" method="post" style="display:inline;">
+                    <button type="submit" style="background:none; border:none; color:blue; text-decoration:underline; cursor:pointer;">Logout</button>
+                </form>
+            </div>
 
-<a th:href="@{'/posts/' + ${post.id} + '/edit'}">Edit Post</a>
+            <div sec:authorize="isAnonymous()">
+                <a th:href="@{/login}">Login</a>
+            </div>
+        </div>
 
-<hr>
-<h2>Comments</h2>
-<div th:each="comment : ${comments}">
-    <p>
-        <strong th:text="${comment.name}">Commenter Name</strong>:
-        <span th:text="${comment.comment}">Comment text</span>
-    </p>
+    </div>
 
-    <!-- Edit Link -->
-    <a th:href="@{'/comments/' + ${comment.id} + '/update?postId=' + ${post.id}}">Edit</a>
+    <h1 th:text="${post.title}"></h1>
+    <div class="post-meta">
+        <span th:text="${post.author.name}"></span>,
+        <span th:text="${post.publishedAt}"></span>
+    </div>
 
-    <form th:action="@{'/comments/' + ${comment.id} + '/delete'}" method="post">
-        <input type="hidden" name="postId" th:value="${post.id}" />
-        <button type="submit">Delete</button>
-    </form>
-    <hr/>
+    <div class="post-content" th:text="${post.content}"></div>
+
+<!--    <p><a th:href="@{'/posts/' + ${post.id} + '/edit'}">Edit Post</a></p>-->
+
+    <div class="comments-section">
+        <h2>Comments</h2>
+        <div th:each="comment : ${comments}">
+            <p>
+                <strong th:text="${comment.name}">Commenter Name</strong>:
+                <span th:text="${comment.comment}">Comment text</span>
+            </p>
+
+<!--            &lt;!&ndash; Edit Link &ndash;&gt;-->
+<!--            <a th:href="@{'/comments/' + ${comment.id} + '/update?postId=' + ${post.id}}">Edit</a>-->
+
+
+            <!-- Edit Link -->
+            <div sec:authorize="isAuthenticated()">
+<!--                    <p th:text="${comment.comment}"></p>-->
+
+                    <!-- Only show the Edit link if the logged-in user is the author of the comment -->
+                    <div th:if="${loggedInUser != null and comment.email == loggedInUser.email}">
+                        <a th:href="@{'/comments/' + ${comment.id} + '/update?postId=' + ${post.id}}">Edit</a>
+                    </div>
+
+
+                <!-- Show Delete button if user is either admin OR comment author -->
+                <div th:if="${loggedInUser != null and (loggedInUser.role == 'ADMIN' or comment.email == loggedInUser.email)}">
+                    <form th:action="@{'/comments/' + ${comment.id} + '/delete'}" method="post" style="display:inline;">
+                        <input type="hidden" name="postId" th:value="${post.id}" />
+                        <button type="submit">Delete</button>
+                    </form>
+                </div>
+            </div>
+
+
+<!--            <form th:action="@{'/comments/' + ${comment.id} + '/delete'}" method="post" style="display:inline;">-->
+<!--                <input type="hidden" name="postId" th:value="${post.id}" />-->
+<!--                <button type="submit">Delete</button>-->
+<!--            </form>-->
+            <hr/>
+        </div>
+
+        <form th:action="@{/comments/add}" th:object="${commentForm}" method="post">
+<!--            <input type="hidden" name="postId" th:value="${post.id}" />-->
+            <input type="hidden" th:field="*{post.id}" />
+
+
+            <label>Name:</label><br>
+            <input type="text" th:field="*{name}" required /><br>
+
+            <label>Email:</label><br>
+            <input type="email" th:field="*{email}" required /><br>
+
+            <label>Comment:</label><br>
+            <textarea th:field="*{comment}" rows="4" cols="50" required></textarea><br>
+
+            <button type="submit">Add Comment</button>
+        </form>
+    </div>
 </div>
-
-<!-- ADD COMMENT FORM -->
-<!--<h3>Add Comment</h3>-->
-<!--<form th:action="@{/comments/add}" th:object="${comment}" method="post">-->
-<!--    <input type="hidden" name="postId" th:value="${post.id}" />-->
-
-<!--&lt;!&ndash;  <input type="hidden" th:field="*{post.id}" />&ndash;&gt;-->
-
-<!--    <label>Name:</label><br>-->
-<!--    <input type="text" th:field="*{name}" required /><br><br>-->
-
-<!--    <label>Email:</label><br>-->
-<!--    <input type="email" th:field="*{email}"  required /><br><br>-->
-
-<!--    <label>Comment:</label><br>-->
-<!--    <textarea th:field="*{comment}"  rows="4" cols="50" required></textarea><br><br>-->
-
-<!--    <button type="submit">Add Comment</button>-->
-<!--</form>-->
-
-<form th:action="@{/comments/add}" th:object="${commentForm}" method="post">
-    <input type="hidden" name="postId" th:value="${post.id}" />
-
-    <label>Name:</label><br>
-    <input type="text" th:field="*{name}" required /><br><br>
-
-    <label>Email:</label><br>
-    <input type="email" th:field="*{email}" required /><br><br>
-
-    <label>Comment:</label><br>
-    <textarea th:field="*{comment}" rows="4" cols="50" required></textarea><br><br>
-
-    <button type="submit">Add Comment</button>
-</form>
-
-<!--<form th:action="@{/comments/add}" method="post">-->
-<!--    <input type="hidden" name="postId" th:value="${post.id}" />-->
-
-<!--    <label>Name:</label><br>-->
-<!--    <input type="text" name="name" required /><br><br>-->
-
-<!--    <label>Email:</label><br>-->
-<!--    <input type="email" name="email" required /><br><br>-->
-
-<!--    <label>Comment:</label><br>-->
-<!--    <textarea name="comment" rows="4" cols="50" required></textarea><br><br>-->
-
-<!--    <button type="submit">Add Comment</button>-->
-<!--</form>-->
 </body>
 </html>
